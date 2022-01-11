@@ -108,7 +108,7 @@ try :
     files = [ { "path" : e, "date" : os.stat(e)[9] } for e in files] 
     files = sorted(files , key = lambda x : x["date"], reverse=True)
  
-    files = files[:3]
+    #files = files[:3]
  
  
     #warning(files)
@@ -290,8 +290,6 @@ try :
     <html>
     
 <style type="text/css">
-p {
-}
 div {
   border: 1px solid black;
   }
@@ -301,59 +299,100 @@ div {
 .display {
   display: none;
   }
+ body {
+  font-family: Arial;
+  color: white;
+   font-size: large;
+}
+
+.top {
+  height: 10% ;
+  width: 100% ;
+  position: fixed;
+  background-color: #82a43a; 
+}
+
+.bottom {
+  height: 90% ;
+  width: 100% ;
+  top: 50 ;
+  overflow-x: hidden;
+  padding-top: 20px;
+  left: 0;
+  background-color: #111;
+}
+.centered {
+ 
+}
+.form {
+    webkit-text-size-adjust: 100% 
+}
   </style>
-<div>1 : Ceci est un div normal</div>
-<div class="visibility">2 : Ceci est un div avec visibility: hidden</div>
-<div>3 : Ceci est un div normal</div>
-<div class="display">4 : Ceci est un div avec display: none</div>
-<div>5 : Ceci est un div normal</div>
+  
+    <head>
 
+        <div class=top>
+            <a href="#H00000"> H00000 </a>
+            <a href="#H00001"> H00001 </a>
+            <a href="#H00002"> H00002 </a>
+            <form class="form">
+                 <input id="search" type="text" class="input" placeholder="search..."/>
+            </form>
 
-           <div clsss="form-container">
-              <form class="form">
-                  <input id="search" type="text" class="input" placeholder="search..."/>
-              </form>
-
-            </div>
-<head>
-    <title> %d papers</title>
+       </div>
+    <title> NUM papers</title>
     <script> 
         LIST 
         
         const searchInput = document.querySelector('.input')
+        var current=-1;
         searchInput.addEventListener("input", (e) => {
             let value = e.target.value
             if (value && value.trim().length > 0){
                 value = value.trim().toLowerCase()
                 console.log(value);
                 re = new RegExp(value)
-                const found = texts.find(el => el['full'].indexOf(value) >= 0);
-                console.log(found);
-                const foundre = texts.find(el => re.test(el['full']));
+                //const found = texts.find(el,index => el['full'].indexOf(value) >= 0);
+                //console.log(found);
+                console.log(current);
+                function check(el, index) {
+                    return re.test(el['full']); // and index >= current
+                }
+                const foundre = texts.find(check);
                 console.log(foundre);
-                console.log(window);
-                console.log(foundre.href);
-                h = foundre.href;
-                window.location.href = '#' + h;
-                var top = document.getElementById('#' + h).offsetTop; //Getting Y of target element
-                console.log(top);
-                window.scrollTo(0, top); 
+                if (foundre) {
+                    current = foundre.index
+                    console.log(foundre);
+                    console.log(window);
+                    console.log(foundre.href);
+                    h = foundre.href;
+                    window.location.href = '#' + h;
+                    var top = document.getElementById(h).offsetTop; //Getting Y of target element
+                    console.log(top);
+                    window.scrollTo(0, top); 
+                    searchInput.focus();
+                } else {
+                    current = -1;
+                }
             }
         })
 
       
         
         </script>  
-       </head>
+    </head>
 
-       <body>
+    <body>
        
-       
+
+       </div>
+       <div class=bottom>
         
-          %s
-       </body>
+          TEXT
+       </div>
+    </body>
 
-    </html>
+</html>
     """
 
     href = lambda i: 'H' + str(i).zfill(5)
@@ -363,14 +402,14 @@ div {
 
     def listf(x) : 
         i, (im0, pdf, title, full) = x 
-        return '{ href : "' + href(i) + '" , title : "' + process(str(title)) + '", full : "' + process(str(full)) + '" }'
+        return '{ href : "' + href(i) + '", index : "' + str(i) +  '" , title : "' + process(str(title)).lower() + '", full : "' + process(str(full)).lower() + '" }'
         
     html = html.replace("LIST", "const texts = [ " + ',\n'.join(map(listf, enumerate(limages))) + "]")
+    html = html.replace("NUM", str(len(files)))
 
+    enc = lambda i, im0, pdf, title, full : '  <p id="%s" title = "%s" >  <a href="%s" > <img src="%s" alt = "%s" /> </a>  </p>' % ( href(i), title,  pdf, im0, pdf)
 
-    enc = lambda i, im0, pdf, title, full : '  <p id="#%s" title = "%s" >  <a href="%s" > <img src="%s" alt = "%s" /> </a>  </p>' % ( href(i), title,  pdf, im0, pdf)
-
-    shtml = html % (len(files), '\n'.join([enc(i, im0,pdf,title, full) for i, (im0, pdf, title, full) in enumerate(limages)]))
+    shtml = html.replace("TEXT", '\n'.join([enc(i, im0,pdf,title, full) for i, (im0, pdf, title, full) in enumerate(limages)]))
     with open(os.path.join(pdf_dir, 'index.html'), 'w') as the_file:
         the_file.write(shtml)
 
