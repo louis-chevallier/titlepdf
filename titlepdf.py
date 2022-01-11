@@ -336,6 +336,7 @@ div {
                 h = foundre.href;
                 window.location.href = '#' + h;
                 var top = document.getElementById('#' + h).offsetTop; //Getting Y of target element
+                console.log(top);
                 window.scrollTo(0, top); 
             }
         })
