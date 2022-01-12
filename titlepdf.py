@@ -306,14 +306,18 @@ div {
 }
 
 .top {
-  height: 10% ;
+  height: 50 ;
   width: 100% ;
   position: fixed;
+  /* 
   background-color: #82a43a; 
+  */
 }
 
 .bottom {
+  /*
   height: 90% ;
+  */
   width: 100% ;
   top: 50 ;
   overflow-x: hidden;
@@ -325,20 +329,16 @@ div {
  
 }
 .form {
-    webkit-text-size-adjust: 100% 
+    webkit-text-size-adjust: 100%;
+    font-size: large;
 }
   </style>
   
     <head>
-
         <div class=top>
-            <a href="#H00000"> H00000 </a>
-            <a href="#H00001"> H00001 </a>
-            <a href="#H00002"> H00002 </a>
             <form class="form">
                  <input id="search" type="text" class="input" placeholder="search..."/>
             </form>
-
        </div>
     <title> NUM papers</title>
     <script> 
@@ -356,7 +356,7 @@ div {
                 //console.log(found);
                 console.log(current);
                 function check(el, index) {
-                    return re.test(el['full']); // and index >= current
+                    return re.test(el['title']) or re.test(el['full']); // and index >= current
                 }
                 const foundre = texts.find(check);
                 console.log(foundre);
@@ -383,13 +383,9 @@ div {
     </head>
 
     <body>
-       
-
-       </div>
-       <div class=bottom>
-        
+ 
           TEXT
-       </div>
+ 
     </body>
 
 </html>
@@ -407,7 +403,7 @@ div {
     html = html.replace("LIST", "const texts = [ " + ',\n'.join(map(listf, enumerate(limages))) + "]")
     html = html.replace("NUM", str(len(files)))
 
-    enc = lambda i, im0, pdf, title, full : '  <p id="%s" title = "%s" >  <a href="%s" > <img src="%s" alt = "%s" /> </a>  </p>' % ( href(i), title,  pdf, im0, pdf)
+    enc = lambda i, im0, pdf, title, full : ' <a id="%s" href="%s" > <img src="%s" alt = "%s" /> </a>' % ( href(i), pdf, im0, title)
 
     shtml = html.replace("TEXT", '\n'.join([enc(i, im0,pdf,title, full) for i, (im0, pdf, title, full) in enumerate(limages)]))
     with open(os.path.join(pdf_dir, 'index.html'), 'w') as the_file:
