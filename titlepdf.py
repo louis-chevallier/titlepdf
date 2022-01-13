@@ -108,7 +108,7 @@ try :
     files = [ { "path" : e, "date" : os.stat(e)[9] } for e in files] 
     files = sorted(files , key = lambda x : x["date"], reverse=True)
  
-    #files = files[:3]
+    files = files[:3]
  
  
     #warning(files)
@@ -286,8 +286,8 @@ try :
     
 
     html = """
-    <!DOCTYPE html>
-    <html>
+<!DOCTYPE html>
+<html>
     
 <style type="text/css">
 div {
@@ -311,8 +311,10 @@ div {
   position: fixed;
   /* 
   background-color: #82a43a; 
-  */
-}
+  */;
+  display: flex;
+  flex-direction: row;
+},
 
 .bottom {
   /*
@@ -331,49 +333,102 @@ div {
 .form {
     webkit-text-size-adjust: 100%;
     font-size: large;
+},
+
+.mytext {
+    color: #dc143c;
+    font-size: medium;
+    background-color: #555555;
+    width: 100%;
 }
+
+
+
+
+
   </style>
   
     <head>
+        <title> NUM papers</title>
         <div class=top>
             <form class="form">
                  <input id="search" type="text" class="input" placeholder="search..."/>
             </form>
+            <button id="next" name="button">Next</button>
+            <div id="area" class="mytext"> ...blank ... </div>
        </div>
-    <title> NUM papers</title>
+    
     <script> 
         LIST 
         
         const searchInput = document.querySelector('.input')
-        var current=-1;
-        searchInput.addEventListener("input", (e) => {
-            let value = e.target.value
-            if (value && value.trim().length > 0){
-                value = value.trim().toLowerCase()
+        var current=0;
+        area = document.getElementById("area");
+        console.log(area);
+        console.log(texts.length);
+        function searchFrom(idx, value) {
+                      
                 console.log(value);
                 re = new RegExp(value)
                 //const found = texts.find(el,index => el['full'].indexOf(value) >= 0);
                 //console.log(found);
                 console.log(current);
-                function check(el, index) {
-                    return re.test(el['title']) or re.test(el['full']); // and index >= current
+                
+                while(true) {
+                    console.log(idx);
+                    if (idx >= texts.length) {
+                        idx = 0;
+                        break;
+                    }
+                    pat = '.{5}' + value + '.{5}';
+                    matches = (texts[idx].full + texts[idx].title).matchAll(pat);
+                    matches = [ ... matches ];
+                    console.log(matches);
+                    if (matches.length == 0) {
+                        idx += 1;
+                    } else {
+                        fff = matches[0];
+                        console.log("found :" + fff);
+                        area.innerHTML = fff;
+                        break;
+                    }
                 }
-                const foundre = texts.find(check);
-                console.log(foundre);
-                if (foundre) {
-                    current = foundre.index
-                    console.log(foundre);
-                    console.log(window);
-                    console.log(foundre.href);
-                    h = foundre.href;
-                    window.location.href = '#' + h;
-                    var top = document.getElementById(h).offsetTop; //Getting Y of target element
-                    console.log(top);
-                    window.scrollTo(0, top); 
-                    searchInput.focus();
-                } else {
-                    current = -1;
+                console.log(window);
+                h = texts[idx].href;
+                console.log(h);
+                window.location.href = '#' + h;
+                var top = document.getElementById(h).offsetTop; //Getting Y of target element
+                console.log(top);
+                window.scrollTo(0, top); 
+                searchInput.focus();
+                console.log(idx);
+                return idx+1;
+        }
+        
+        
+        actions = {
+            1 : function(token) {
+                    current = searchFrom(current, token);
+                    return 1;
                 }
+        };
+        state = 1;
+        bnext = document.getElementById('next');
+        console.log(bnext);
+        bnext.addEventListener('click', function (e) {
+            console.log(e);
+            {
+                console.log(e.target.value);
+                state = actions[state](e.target.value);
+            }});
+            
+        searchInput.addEventListener("input", (e) => {
+            let value = e.target.value
+            if (value && value.trim().length > 0){
+                value = value.trim().toLowerCase()
+                state = actions[state](e.target.value);
+                console.log(e.target.value);
+                
             }
         })
 
